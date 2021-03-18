@@ -1,0 +1,62 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@model HangMan.Models.GameViewModel
+
+@if (!SignInManager.IsSignedIn(User))
+{
+    <h2>Please sign in</h2>
+}
+else
+{
+
+    ViewData["Title"] = "Please guess the word ";
+
+    <h2>Please guess the word</h2>
+
+    <h1>@Model.DisguisedWord</h1>
+
+    <p></p>
+
+    @if (Model.StateOfPlay == StateOfPlay.InPlay)
+    {
+        <h2>Lives Remaining @Model.Lives</h2>
+
+        @using (Html.BeginForm("Guess", "Game"))
+        {
+            <input type="text" maxlength="1" name="letter" value="" pattern="[a-zA-Z]" title="letters only" />
+            <input type="submit" value="Update" />
+        }
+    }
+    else if (Model.StateOfPlay == StateOfPlay.Won)
+    {
+        <h2>WE HAVE A WINNER</h2>
+    }
+    else
+    {
+        <h2>GAME OVER : The word is @Model.ActualWord</h2>
+    }
+
+    <h4>Guessed Letters</h4>
+    @if (string.IsNullOrWhiteSpace(Model.GuessedLetters))
+    {
+        <p>None</p>
+    }
+    else
+    {
+        <p>@Model.GuessedLetters</p>
+    }
+
+
+    @Html.ActionLink("New Game", "NewGame", "Game", new { @class = "btn btn-success btn-xs" })
+    <p></p>
+
+
+    @if (Model.StateOfPlay == StateOfPlay.Won)
+    {
+        if (SignInManager.IsSignedIn(User))
+            @Html.ActionLink("Save your score", "Save", "Games", new { Model.Lives, Model.ActualWord, User = User.Identity.Name })
+        else
+            @Html.ActionLink("Save your score", "Save", "Games", new { Model.Lives, Model.ActualWord, User = "Unknown" })
+    }
+}
